@@ -1,0 +1,21 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>動画アップロード</title>
+  </head>
+  <body>
+    <div>
+      <h1>動画アップロード</h1>
+      <form action="/transcribe" method="POST" enctype="multipart/form-data">
+        <div>
+          <label for="video">動画ファイル:</label>
+          <input type="file" id="video" name="video" accept="video/*" required>
+        </div>
+        <button type="submit">アップロード</button>
+      </form>
+    </div>
+  </body>
+</html>

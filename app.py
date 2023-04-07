@@ -5,11 +5,14 @@ import moviepy.editor as mp
 import requests
 import json
 import os
+import tiktoken
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
 # API キーを設定
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+Model = "gpt-3.5-turbo"
+TokenLength = 4096
 
 def transcribe_audio(audio_path):
     with open(audio_path, "rb") as audio_file:
@@ -44,6 +47,39 @@ def transcribe_video():
     return transcript
 
 
+def split_text(text, max_tokens):
+    encoding = tiktoken.encoding_for_model(Model)
+
+    tokens =  encoding.encode(text)
+    token_length = len(tokens)
+
+    # トークン数がmax_tokensを超える場合は、max_tokensで分割
+    split_num = token_length // max_tokens + 1
+    if split_num == 0:
+        return [text]
+
+    chunks = []
+    temp = ""
+    num = 0
+    for c in text:
+        print(c, len(text), split_num, num, token_length)
+        if len(text)/split_num > num:
+            temp += c
+            num += 1
+        else:
+            chunks.append(temp)
+            temp = ""
+            num = 0
+    
+    chunks.append(temp)
+    return chunks
+
+@app.route("/summary", methods=["GET"])
+def summary():
+    text = "北海道大学では、今日、新型コロナウイルスの感染対策として、午前と午後の2回に分けて入学式が行われ、2546人の新入学生のうち、およそ7割が同外出身者です。北京清浜総長は、ビーアンビシャスの精神に思いをめぐらせてほしいとエールを送りました。新入生たちは、これから始まるエルムの森での大学生活に向けて、期待に胸を膨らませていました。"
+    chunks = split_text(text, 60)
+    print(chunks)
+    return text
 
 @app.route("/", methods=["GET", "POST"])
 def index():
